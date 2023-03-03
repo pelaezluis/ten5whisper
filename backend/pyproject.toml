@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "ten5whisper"
+version = "0.1.0"
+description = ""
+authors = ["pelaezluis <luispelaezbedoya@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.92.0"
+uvicorn = "^0.20.0"
+whisper = "^1.1.10"
+torch = {url = "https://download.pytorch.org/whl/cu102/torch-1.10.2%2Bcu102-cp39-cp39-win_amd64.whl"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

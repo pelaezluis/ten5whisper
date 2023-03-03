@@ -1,0 +1,85 @@
+version: "3.8"
+
+services:
+  ten5whisper:
+    container_name: ten5whisper
+    restart: always
+    # platform: linux/arm64/v8
+    build:
+      context: ./backend
+      dockerfile: backend.dockerfile
+      args:
+        INSTALL_DEV: ${INSTALL_DEV-false}
+
+    command: "sh -c 'uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000'"  
+    expose:
+      - "8000"
+    volumes:
+      - ./backend/app:/code
+    env_file: .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ten5whisper_local.entrypoints=web"
+      - "traefik.http.routers.ten5whisper_local.rule=Host(`whisper.${LOCAL_1}`, `whisper.${LOCAL_2}`)"
+      - "traefik.http.services.ten5whisper_local_service.loadbalancer.server.port=8000"
+      # - "traefik.http.routers.fastapi_local_ssl.entrypoints=websecure"
+      # - "traefik.http.routers.fastapi_local_ssl.rule=Host(`whisper.${LOCAL_1}`, `whisper.${LOCAL_2}`)"
+      - "traefik.http.routers.ten5whisper_local.tls=true"
+
+
+  redis:
+    container_name: redis
+    image: "redis:7.0.4-alpine3.16"
+    restart: always
+    platform: linux/arm64/v8
+    expose:
+      - "6379"
+    env_file: .env
+
+
+  celery_worker:
+    container_name: celery_worker
+    restart: always
+    platform: linux/arm64/v8
+    build:
+      context: ./backend
+      dockerfile: backend.dockerfile
+      args:
+        INSTALL_DEV: ${INSTALL_DEV-false}
+    command: "celery -A app.core.worker worker -l info "
+    # command: " watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A app.core.worker worker -l info "
+    volumes:
+      - ./backend/app:/code
+      # - "${EB_LOG_BASE_DIR}/php-app:/var/log/celery"
+    depends_on:
+      - ten5_fastapi
+      - ten5_redis
+    env_file: .env
+
+
+  reverse_proxy:
+    container_name: "reverse_proxy"
+    restart: always
+    image: "traefik:latest"
+    command:
+      - "--providers.docker=true"
+    expose:
+      - 80
+      - 443
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - ./traefik/traefik.yml:/traefik.yml:ro
+      - ./traefik/.htpasswd:/.htpasswd
+      - ./traefik/certs/ssl.pem:/certs/ssl.pem
+      - ./traefik/certs/ssl.key:/certs/ssl.key
+      - "${EB_LOG_BASE_DIR:-./traefik}/traefik-proxy:/logs"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${LOCAL_1}`, `traefik.${LOCAL_2}`,`traefik.${EXT_ENDPOINT1}`, `traefik.${EXT_ENDPOINT2}`, `traefik.${EXT_ENDPOINT3}`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      # - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.middlewares.auth.basicauth.usersfile=/.htpasswd"

@@ -1,0 +1,39 @@
+api:
+  dashboard: true
+  # insecure: true # Don't do that in production
+
+# Entrypoints
+entryPoints:
+  web:
+    address: :80
+
+  websecure:
+    address: :443
+
+tls:
+  certificates:    
+    - certFile: /traefik/ssl.pem
+      keyFile: /traefik/ssl.key
+
+# Providers
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+
+# metrics:
+#   datadog:
+#     addEntryPointsLabels: true
+#     address: datadog-agent:8125
+
+# tracing:
+#   datadog:
+#     localAgentHostPort: datadog-agent:8126
+
+log:
+  level: DEBUG
+  filePath: "/logs/traefik.log"
+  format: json
+
+accessLog:
+  filePath: "/logs/access.log"
