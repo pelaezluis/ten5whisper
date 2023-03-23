@@ -4,18 +4,14 @@ services:
   ten5whisper:
     container_name: ten5whisper
     restart: always
-    # platform: linux/arm64/v8
     build:
       context: ./backend
-      dockerfile: backend.dockerfile
-      args:
-        INSTALL_DEV: ${INSTALL_DEV-false}
-
+      dockerfile: Dockerfile
     command: "sh -c 'uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000'"  
     expose:
       - "8000"
     volumes:
-      - ./backend/app:/code
+      - ./backend:/code
     env_file: .env
     labels:
       - "traefik.enable=true"
@@ -24,7 +20,7 @@ services:
       - "traefik.http.services.ten5whisper_local_service.loadbalancer.server.port=8000"
       # - "traefik.http.routers.fastapi_local_ssl.entrypoints=websecure"
       # - "traefik.http.routers.fastapi_local_ssl.rule=Host(`whisper.${LOCAL_1}`, `whisper.${LOCAL_2}`)"
-      - "traefik.http.routers.ten5whisper_local.tls=true"
+      # - "traefik.http.routers.ten5whisper_local.tls=true"
 
 
   redis:
@@ -40,20 +36,17 @@ services:
   celery_worker:
     container_name: celery_worker
     restart: always
-    platform: linux/arm64/v8
     build:
       context: ./backend
-      dockerfile: backend.dockerfile
-      args:
-        INSTALL_DEV: ${INSTALL_DEV-false}
+      dockerfile: Dockerfile
     command: "celery -A app.core.worker worker -l info "
     # command: " watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A app.core.worker worker -l info "
     volumes:
-      - ./backend/app:/code
+      - ./backend:/code
       # - "${EB_LOG_BASE_DIR}/php-app:/var/log/celery"
     depends_on:
-      - ten5_fastapi
-      - ten5_redis
+      - ten5whisper
+      - redis
     env_file: .env
 
 

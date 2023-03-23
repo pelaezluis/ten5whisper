@@ -6,7 +6,7 @@ WORKDIR /code
 # Install Poetry
 RUN apt clean && apt update && apt install libsndfile1 ffmpeg libgstreamer1.0-0 libsndfile1-dev libgirepository1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-ugly wkhtmltopdf -y
 
-COPY app/pyproject.toml app/poetry.lock* /code/
+COPY pyproject.toml poetry.lock* /code/
 
 # Allow installing dev dependencies to run tests
 RUN pip install poetry

@@ -1,15 +1,16 @@
 from app.core.worker import celery
 import asyncio
-from fastapi import Depends
 from app.core.config import settings
 import json
 import httpx
 
 from backend.app.core.deps import s3_auth
+
 # import whisper
 
+
 ######################################## TRANSCRIBE AUDIO ##########################################
-async def transcribe_audio(audio_media_id: str): #, s3=s3_auth()):
+async def transcribe_audio(audio_media_id: str):  # , s3=s3_auth()):
     """
     Transcribe voice message to text and storage it in the database
     """
@@ -40,16 +41,15 @@ async def transcribe_audio(audio_media_id: str): #, s3=s3_auth()):
 
                     c = 0  # This is to do a while loop if fails at first try
 
-                    while audio == None and c < 10:
+                    while audio is None and c < 10:
                         audio = await convert_audio_file(audio_file_temp.name, ext)
                         c += 1
                         print(f">>> TRY {c}")
                     if audio:
-
                         async with httpx.AsyncClient() as client:
                             headers: dict = {
                                 "authorization": f"Bearer {settings.BASE_TOKEN}",
-                                "Content-Type": f"audio/wav",
+                                "Content-Type": "audio/wav",
                                 "Transfer-encoding": "chunked",
                             }
 
@@ -71,20 +71,22 @@ async def transcribe_audio(audio_media_id: str): #, s3=s3_auth()):
                                 if "is_final" in complete_text:
                                     final_text += f" {complete_text['text']}"
 
-                            print('-'*30)
+                            print("-" * 30)
                             final_text = final_text.lstrip()
                             data = {"text": final_text}
-                            
 
-                        obj_new = {"voice_transcription": data["text"], "sentiment": sentiment['data']['text']}
+                        obj_new = {
+                            "voice_transcription": data["text"],
+                            "sentiment": sentiment["data"]["text"],
+                        }
                         await crud.audio.update(
                             obj_current=media_audio, obj_new=obj_new, db_session=session
                         )
-                        
+
                         print(f">>> AUDIO {media_audio.id} TRANSCRIBED")
-                        data['id'] = audio_media_id
-                        data['audio_in'] = media_path
-                        data['sentiment'] = sentiment['data']['text']
+                        data["id"] = audio_media_id
+                        data["audio_in"] = media_path
+                        data["sentiment"] = sentiment["data"]["text"]
                         return data
                     else:
                         obj_new = {
@@ -143,7 +145,7 @@ async def transcribe_audio_whisper(audio_media_id: str, s3=s3_auth()):
                     )
                     c = 0  # This is to do a while loop if fails at first try
 
-                    while data == None and c < 10:
+                    while data is None and c < 10:
                         data = await convert_audio_file(
                             audio_file_temp.name, ext, returned=0
                         )
@@ -215,7 +217,7 @@ async def convert_audio_file(
             result = model.transcribe(audio_output_temp.name)
             print(">>> AUDIO CONVERTED")
             return result
-    except Exception as err:
+    except Exception:
         # print("!!! ERROR:",err, "FORMAT: ", input_format)
         print("!!! ERROR FORMAT: ", input_format)
         return None
@@ -225,4 +227,3 @@ async def convert_audio_file(
 def transcribe_voice_message(audio_media_id: str):
     loop = asyncio.get_event_loop()
     loop.run_until_complete(transcribe_audio(audio_media_id=audio_media_id))
-
