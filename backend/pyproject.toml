@@ -6,11 +6,21 @@ authors = ["pelaezluis <luispelaezbedoya@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
-fastapi = "^0.92.0"
+python = ">=3.8,<3.11"
+numba = "^0.56.4"
+openai-whisper = {git = "https://github.com/openai/whisper.git"}
+fastapi = "^0.93.0"
 uvicorn = "^0.20.0"
-whisper = "^1.1.10"
-torch = {url = "https://download.pytorch.org/whl/cu102/torch-1.10.2%2Bcu102-cp39-cp39-win_amd64.whl"}
+celery = "^5.2.7"
+redis = "^4.5.1"
+httpx = "^0.23.3"
+boto3 = "^1.26.87"
+botocore = "^1.29.87"
+python-dotenv = "^1.0.0"
+gtts = "^2.3.1"
+translators = "^5.6.0"
+deep-translator = "^1.10.1"
+
 
 
 [build-system]

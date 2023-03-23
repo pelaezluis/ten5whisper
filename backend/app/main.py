@@ -1,16 +1,26 @@
-# import whisper
-
-# model = whisper.load_model("base")
-# audio = "test_whisper/l38kg-w9041.opus"
-# result = model.transcribe(audio)
-# print(result["text"])
 from fastapi import FastAPI
 from app.api import api
-app = FastAPI()
+from contextlib import asynccontextmanager
+import whisper
+
+
+MODEL = 'base'
+model = {}
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print(f'Loading {MODEL} model')
+    model['whisper'] = whisper.load_model(MODEL)
+    yield
+    print('Shutting down the model...')
+
+
+app = FastAPI(lifespan=lifespan)
+
 
 @app.get('/')
 async def root():
     return {'message': 'Server is running'}
 
 
-app.include_router(api.router)
+app.include_router(api.router, )

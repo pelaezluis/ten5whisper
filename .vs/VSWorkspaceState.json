@@ -1,0 +1,11 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\backend",
+    "\\backend\\app",
+    "\\backend\\app\\api",
+    "\\backend\\app\\api\\endpoints"
+  ],
+  "SelectedNode": "\\backend\\app\\api\\endpoints\\translate.py",
+  "PreviewInSolutionExplorer": false
+}
