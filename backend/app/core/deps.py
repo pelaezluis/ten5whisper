@@ -10,19 +10,9 @@ import boto3
 from botocore.client import BaseClient
 from botocore.config import Config
 
-# from app.utils.speech import SpeechModel
-
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/access-token"
 )
-
-# @contextmanager
-# def get_audio_model() -> Generator:
-#     try:
-#         speech_model = SpeechModel()
-#         yield speech_model
-#     finally:
-#         pass
 
 
 async def get_redis() -> AsyncIterator[Redis]:

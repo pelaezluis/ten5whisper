@@ -2,7 +2,7 @@ from celery import Celery
 import os
 
 celery = Celery("task")
-celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
+celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379")
 
 
 class CeleryConfig:
@@ -16,7 +16,7 @@ class CeleryConfig:
 celery.config_from_object(CeleryConfig)
 
 celery.conf.result_backend = os.environ.get(
-    "CELERY_RESULT_BACKEND", "redis://localhost:6379"
+    "CELERY_RESULT_BACKEND", "redis://redis:6379"
 )
 celery.autodiscover_tasks()
 
