@@ -13,7 +13,7 @@ from app.utils.storage_redis import add_prediction_to_redis
 
 
 ######################################## TRANSCRIBE AUDIO ##########################################
-async def transcribe_audio_whisper(audio_media_path: str, job_id: UUID | str, model: Any):
+async def transcribe_audio_whisper(audio_media_path: str, job_id: str, model: Any):
     """
     Transcribe voice message to text and storage it in the database
     """
@@ -22,7 +22,7 @@ async def transcribe_audio_whisper(audio_media_path: str, job_id: UUID | str, mo
     try:
         if validate_format(ext):
             data = await convert_audio_file(audio_media_path, model)
-            await add_prediction_to_redis(job_id, data)
+            added = await add_prediction_to_redis(job_id, data)
             end = time()
             print(f'The transcription took {round(end-start, 2)} seconds')
         else:
@@ -66,7 +66,7 @@ async def convert_audio_file(audio_media_path: str, model: Any):
 
 
 @celery.task(name="transcribe_voice_message")
-def transcribe_voice_message(audio_media_path: str, job_id: str | UUID, model: Any):
+def transcribe_voice_message(audio_media_path: str, job_id: str, model: Any):
     loop = asyncio.get_event_loop()
     loop.run_until_complete(
         transcribe_audio_whisper(audio_media_path=audio_media_path, job_id=job_id, model=model)

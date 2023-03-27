@@ -17,6 +17,6 @@ async def check_translate(job_id: str = Query(...)):
 
 @router.post("/translate_audio", response_model=IPostResponseBase[dict])
 async def translate_audio(audio_path: str = Body(...)):
-    job_id = uuid4()
+    job_id = str(uuid4())
     transcribe_voice_message.delay(audio_path, job_id, model=g.whisper_model)
     return create_response(data={'job_id': job_id})

@@ -10,10 +10,10 @@ async def add_prediction_to_redis(
     data: dict
 ):  
     redis_client: Redis = await get_redis_client()
-    job_id = str(uuid())
     data = dumps(data)
     print(data)
     await redis_client.setex(job_id, 60000, data)
+    return "ADDED"
 
 
 async def get_prediction(job_id: str):
@@ -21,8 +21,7 @@ async def get_prediction(job_id: str):
     exists = await redis_client.exists(job_id)
     if exists:
         prediction = await redis_client.get(job_id)
-        print(prediction)
-        return prediction
+        return loads(prediction)
     return {'message': 'The job_id doesn\'t exist'}
 
 
