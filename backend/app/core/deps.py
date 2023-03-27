@@ -1,5 +1,4 @@
 from typing import AsyncIterator
-from app.core.redis_manager import RedisManager
 from fastapi.security import OAuth2PasswordBearer
 from app.core.config import settings
 
@@ -10,15 +9,19 @@ import boto3
 from botocore.client import BaseClient
 from botocore.config import Config
 
-reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/login/access-token"
-)
+# reusable_oauth2 = OAuth2PasswordBearer(
+#     tokenUrl=f"{settings.API_V1_STR}/login/access-token"
+# )
 
 
-async def get_redis() -> AsyncIterator[Redis]:
-    pool = RedisManager()
-    yield pool
-
+async def get_redis_client() -> Redis:
+    redis = await aioredis.from_url(
+        settings.CELERY_BROKER_URL,
+        max_connections=10,
+        encoding="utf-8",
+        decode_responses=True,
+    )
+    return redis
 
 async def SessionRedis():
     # Redis client bound to pool of connections (auto-reconnecting).

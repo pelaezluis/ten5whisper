@@ -11,9 +11,11 @@ class Settings(BaseSettings):
     SERVER_NAME: str = os.environ["SERVER_NAME"]
     PROJECT_NAME: str
     CELERY_BROKER_URL: str = os.environ.get(
-        "CELERY_BROKER_URL", "redis://localhost:6379"
+        "CELERY_BROKER_URL", "redis://redis:6379"
     )
-    CELERY_RESULT_BACKEND: str
+    CELERY_RESULT_BACKEND: str = os.environ.get(
+        "CELERY_BROKER_URL", "redis://redis:6379"
+    )
     BACKEND_CORS_ORIGINS: Union[List[str], List[AnyHttpUrl]]
     MODEL_NAME: str = "tiny"
 

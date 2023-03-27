@@ -70,7 +70,7 @@ services:
       - "${EB_LOG_BASE_DIR:-./traefik}/traefik-proxy:/logs"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`traefik.${LOCAL_1}`, `traefik.${LOCAL_2}`,`traefik.${EXT_ENDPOINT1}`, `traefik.${EXT_ENDPOINT2}`, `traefik.${EXT_ENDPOINT3}`)"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${LOCAL_1}`, `traefik.${LOCAL_2}`)"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.middlewares=auth"
       # - "traefik.http.routers.dashboard.tls=true"
